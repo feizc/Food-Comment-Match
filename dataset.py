@@ -1,4 +1,6 @@
 import os 
+from transformers import BertTokenizer 
+from torch.utils.data import Dataset 
 
 
 def get_data(data_path):
@@ -31,11 +33,28 @@ def url_supplement(raw_url):
     return url 
 
 
+class FoodCommentDataset(Dataset): 
+    def __init__(self, img_txt_pair_list, tokenizer):
+        self.img_txt_pair_list = img_txt_pair_list 
+        self.tokenizer = tokenizer 
+    
+    def __len__(self):
+        return len(self.img_txt_pair_list) 
+    
+    def __getitem__(self, index):
+        img_txt_pair = self.img_txt_pair_list[index] 
+        url = img_txt_pair['url'] 
+        txt = img_txt_pair['txt'] 
+        return url, txt 
+        
 
 
 
 if __name__ == '__main__': 
     data_path = 'data'
     img_txt_pair_list = get_data(data_path) 
+    tokenizer = BertTokenizer('ckpt/vocab.txt', do_lower_case=True) 
+    dataset = FoodCommentDataset(img_txt_pair_list, tokenizer) 
+    print(dataset[1])
 
 
