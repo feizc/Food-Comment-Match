@@ -419,7 +419,21 @@ class FoodCommentPreTrainedModel(PreTrainedModel):
 
     def _set_gradient_checkpointing(self, module, value=False):
         if isinstance(module, Encoder):
-            module.gradient_checkpointing = value
+            module.gradient_checkpointing = value 
+
+    def post_init(self):
+        """
+        A method executed at the end of each Transformer model initialization, to execute code that needs the model's
+        modules properly initialized (such as weight initialization).
+        """
+        self.init_weights()
+        self._backward_compatibility_gradient_checkpointing() 
+    
+    def _backward_compatibility_gradient_checkpointing(self):
+        if self.supports_gradient_checkpointing and getattr(self.config, "gradient_checkpointing", False):
+            self.gradient_checkpointing_enable()
+            # Remove the attribute now that is has been consumed, so it's no saved in the config.
+            delattr(self.config, "gradient_checkpointing")
 
 
 
@@ -898,7 +912,9 @@ class FoodFeatureExtractor:
                 std = torch.tensor(std)
 
         if image.ndim == 3 and image.shape[0] in [1, 3]:
-            return (image - mean[:, None, None]) / std[:, None, None]
+            return (image - mean[:, None, None]) / std[:, None, None] 
+        elif image.ndim == 3 and image.shape[0] > 3: 
+            return (image[:3, :, :] - mean[:, None, None]) / std[:, None, None]
         else:
             return (image - mean) / std 
         
