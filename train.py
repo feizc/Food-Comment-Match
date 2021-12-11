@@ -6,7 +6,8 @@ import random
 from torch.utils.data import DataLoader
 from model import FoodFeatureExtractor, FoodCommentConfig, FoodCommentModel, contrastive_loss
 from argparse import ArgumentParser 
-from dataset import get_data, FoodCommentDataset 
+from dataset import get_data, FoodCommentDataset, collate_fn
+import os
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -48,37 +49,50 @@ def train(data_loader, model, optimizer, epoch):
     return loss 
 
 
-
-
-
 if __name__ == '__main__': 
     parser = ArgumentParser() 
     parser.add_argument('--data_path', type=str, default='data') 
     parser.add_argument('--model_path', type=str, default='ckpt/original') 
+    parser.add_argument('--save_path', type=str, default='ckpt/FoodComment')
+    parser.add_argument('--use_ckpt', type=bool, default=False)
     args = parser.parse_args() 
 
     print(args) 
     use_cuda = torch.cuda.is_available() 
     device = torch.device('cuda' if use_cuda else 'cpu') 
     lr = 6e-5 
-    batch_size = 1
+    batch_size = 8
     epochs = 1 
 
     tokenizer_class = BertTokenizer 
-    tokenizer = tokenizer_class.from_pretrained('ckpt/vocab.txt', do_lower_case=True) 
-    img_extractor = FoodFeatureExtractor() 
-    model_class = FoodCommentModel
-    model = model_class.from_pretrained('ckpt/original') 
+    model_class = FoodCommentModel 
+    if args.use_ckpt == True: 
+        model = model_class.from_pretrained(args.save_path) 
+        tokenizer = tokenizer_class.from_pretrained(args.save_path)
+
+    else:
+        tokenizer = tokenizer_class.from_pretrained('ckpt/vocab.txt', do_lower_case=True) 
+        model = model_class.from_pretrained('ckpt/original') 
+    pad_token = tokenizer.convert_tokens_to_ids(tokenizer.tokenize('[PAD]'))[0]
 
     model.to(device)
     optimizer = AdamW(model.parameters(), lr=lr) 
 
     train_data = get_data(args.data_path)
+    img_extractor = FoodFeatureExtractor() 
     train_dataset = FoodCommentDataset(train_data, tokenizer, img_extractor)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size)  
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, collate_fn=lambda x: collate_fn(x, pad_token))  
     
 
     for epoch in range(epochs): 
-        train(train_loader, model, optimizer, epoch)
+        train_loss = train(train_loader, model, optimizer, epoch) 
+
+        # save checkpoint
+        torch.save({'model':model.state_dict(), 'optimizer': optimizer.state_dict()},\
+            '%s/epoch_%d'%(args.save_path, epoch))
+        model.config.to_json_file(os.path.join(args.save_path, 'config.json'))
+        tokenizer.save_vocabulary(args.save_path)
+
+
 
 

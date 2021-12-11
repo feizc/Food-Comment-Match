@@ -62,6 +62,27 @@ class FoodCommentDataset(Dataset):
         txt_ids = torch.Tensor(tokenize(txt, self.tokenizer)).long() 
         return image, txt_ids  
 
+
+def collate_fn(batch, pad_token): 
+    def padding(seq, pad_token): 
+        max_len = max([i.size(0) for i in seq]) 
+        if len(seq[0].size()) == 1: 
+            result = torch.ones((len(seq), max_len)).long() * pad_token 
+        else: 
+            result = torch.ones((len(seq), max_len, seq[0].size(-1))).float() * pad_token 
+        for i in range(len(seq)): 
+            result[i, :seq[i].size(0)] = seq[i] 
+        return result 
+    
+    img_list, txt_list = [], [] 
+    for i in batch: 
+        img_list.append(i[0]) 
+        txt_list.append(i[1]) 
+    txt_list = padding(txt_list, pad_token) 
+    img_list = torch.stack(img_list)
+    return img_list, txt_list 
+
+
 if __name__ == '__main__': 
     data_path = 'data'
     img_txt_pair_list = get_data(data_path) 
