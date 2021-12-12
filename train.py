@@ -54,7 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('--data_path', type=str, default='data') 
     parser.add_argument('--model_path', type=str, default='ckpt/original') 
     parser.add_argument('--save_path', type=str, default='ckpt/FoodComment')
-    parser.add_argument('--use_ckpt', type=bool, default=False)
+    parser.add_argument('--use_ckpt', type=bool, default=True)
     args = parser.parse_args() 
 
     print(args) 
@@ -69,6 +69,8 @@ if __name__ == '__main__':
     if args.use_ckpt == True: 
         model = model_class.from_pretrained(args.save_path) 
         tokenizer = tokenizer_class.from_pretrained(args.save_path)
+        ckpt = torch.load('ckpt/FoodComment/pytorch_model.bin', map_location='cpu')
+        model.load_state_dict(ckpt) 
 
     else:
         tokenizer = tokenizer_class.from_pretrained('ckpt/vocab.txt', do_lower_case=True) 
@@ -77,6 +79,7 @@ if __name__ == '__main__':
 
     model.to(device)
     optimizer = AdamW(model.parameters(), lr=lr) 
+    # optimizer.load_state_dict(ckpt['optimizer'])
 
     train_data = get_data(args.data_path)
     img_extractor = FoodFeatureExtractor() 
@@ -88,10 +91,11 @@ if __name__ == '__main__':
         train_loss = train(train_loader, model, optimizer, epoch) 
 
         # save checkpoint
-        torch.save({'model':model.state_dict(), 'optimizer': optimizer.state_dict()},\
-            '%s/epoch_%d'%(args.save_path, epoch))
+        torch.save(model.state_dict(), '%s/pytorch_model.bin'%(args.save_path))
         model.config.to_json_file(os.path.join(args.save_path, 'config.json'))
-        tokenizer.save_vocabulary(args.save_path)
+        tokenizer.save_vocabulary(args.save_path) 
+        break 
+
 
 
 
