@@ -4,11 +4,20 @@ from model import FoodCommentModel, FoodFeatureExtractor
 from transformers import BertTokenizer
 import torch 
 
+import faiss 
+import numpy as np 
+
+
+import warnings
+warnings.filterwarnings("ignore")
+
+
 url = 'https://p0.meituan.net/ugcpic/c35b99aa4301d7a227dca0d2cd55a202'
 image = Image.open(requests.get(url, stream=True).raw) 
 img_extractor = FoodFeatureExtractor()
 image = img_extractor(image)
 model = FoodCommentModel.from_pretrained('ckpt/FoodComment') 
+# print(model.state_dict()['vision_model.encoder.layers.1.layer_norm1.weight'])
 feature = model.get_image_features(image)
 print(feature.size())
 
