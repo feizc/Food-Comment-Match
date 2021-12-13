@@ -7,7 +7,8 @@ from torch.utils.data import DataLoader
 from model import FoodFeatureExtractor, FoodCommentConfig, FoodCommentModel, contrastive_loss
 from argparse import ArgumentParser 
 from dataset import get_data, FoodCommentDataset, collate_fn
-import os
+import os 
+from configuration import FoodCommentConfig 
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--data_path', type=str, default='data') 
     parser.add_argument('--model_path', type=str, default='ckpt/original') 
     parser.add_argument('--save_path', type=str, default='ckpt/FoodComment')
-    parser.add_argument('--use_ckpt', type=bool, default=True)
+    parser.add_argument('--use_ckpt', type=bool, default=False)
     args = parser.parse_args() 
 
     print(args) 
@@ -73,8 +74,9 @@ if __name__ == '__main__':
         model.load_state_dict(ckpt) 
 
     else:
+        configure = FoodCommentConfig()
         tokenizer = tokenizer_class.from_pretrained('ckpt/vocab.txt', do_lower_case=True) 
-        model = model_class.from_pretrained('ckpt/original') 
+        model = model_class(configure) 
     pad_token = tokenizer.convert_tokens_to_ids(tokenizer.tokenize('[PAD]'))[0]
 
     model.to(device)

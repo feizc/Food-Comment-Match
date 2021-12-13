@@ -8,11 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 class CommentConfig(PretrainedConfig):
+    model_type = "Comment"
     '''
     Args:
-        vocab_size (:obj:`int`, `optional`, defaults to 49408):
-            Vocabulary size of the CLIP text model. Defines the number of different tokens that can be represented by
-            the :obj:`inputs_ids` passed when calling :class:`~transformers.CLIPModel`.
+        vocab_size (:obj:`int`, `optional`, defaults to 49408)
         hidden_size (:obj:`int`, `optional`, defaults to 512):
             Dimensionality of the encoder layers and the pooler layer.
         intermediate_size (:obj:`int`, `optional`, defaults to 2048):
@@ -75,7 +74,9 @@ class CommentConfig(PretrainedConfig):
         self.attention_dropout = attention_dropout
 
 
-class FoodConfig(PretrainedConfig):
+class FoodConfig(PretrainedConfig): 
+
+    model_type = "Food"
     '''
     Args:
         hidden_size (:obj:`int`, `optional`, defaults to 768):
@@ -139,20 +140,7 @@ class FoodConfig(PretrainedConfig):
 
 
 class FoodCommentConfig(PretrainedConfig):
-    '''
-    Args:
-        comment_config_dict (:obj:`dict`, `optional`):
-            Dictionary of configuration options used to initialize :class:`~transformers.CLIPTextConfig`.
-        food_config_dict (:obj:`dict`, `optional`):
-            Dictionary of configuration options used to initialize :class:`~transformers.CLIPVisionConfig`.
-        projection_dim (:obj:`int`, `optional`, defaults to 512):
-            Dimentionality of text and vision projection layers.
-        logit_scale_init_value (:obj:`float`, `optional`, defaults to 2.6592):
-            The inital value of the `logit_scale` paramter. Default is used as per the original CLIP implementation.
-        kwargs (`optional`):
-            Dictionary of keyword arguments.
-    '''
-
+    model_type = "FoodComment"
     def __init__(
         self,
         comment_config_dict=None,
