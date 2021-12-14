@@ -65,9 +65,9 @@ if __name__ == '__main__':
     print(args) 
     use_cuda = torch.cuda.is_available() 
     device = torch.device('cuda' if use_cuda else 'cpu') 
-    lr = 6e-5 
+    lr = 6e-3 
     batch_size = 8
-    epochs = 1 
+    epochs = 8 
 
     tokenizer_class = BertTokenizer 
     model_class = FoodCommentModel 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         torch.save(model.state_dict(), '%s/pytorch_model.bin'%(args.save_path))
         model.config.to_json_file(os.path.join(args.save_path, 'config.json'))
         tokenizer.save_vocabulary(args.save_path) 
-        break 
+        
 
 
 
