@@ -721,11 +721,21 @@ class FoodCommentModel(FoodCommentPreTrainedModel):
         logits_per_image = logits_per_text.T
 
         loss = None
-        if return_loss:
+        if return_loss: 
+            # logits_per_text.size() == logits_per_image.size() == (bsz, bsz) 
             loss = contrastive_loss(logits_per_text)
+            accuracy = accuracy_compute(logits_per_text) 
 
         output = (logits_per_image, logits_per_text, text_embeds, image_embeds, text_outputs, vision_outputs)
-        return ((loss,) + output) if loss is not None else output
+        return ((loss, accuracy, ) + output) if loss is not None else output
+
+
+
+def accuracy_compute(logits): 
+    index = torch.argmax(logits, dim=1) 
+    res = torch.eq(index, torch.arange(len(logits))).int()
+    return res.sum() / len(logits)
+
 
 
 

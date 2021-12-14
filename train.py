@@ -34,17 +34,21 @@ setup_seed(2021)
 def train(data_loader, model, optimizer, epoch):
     model.train() 
     running_loss = .0 
+    running_acc = .0
     with tqdm(desc='Epoch %d - train' % epoch, unit='it', total=len(data_loader)) as pbar: 
         for it, (img, txt) in enumerate(data_loader): 
             img, txt = img.to(device), txt.to(device) 
-            loss = model(input_ids=txt, pixel_values=img, return_loss=True)[0] 
+            output = model(input_ids=txt, pixel_values=img, return_loss=True) 
+            loss = output[0]
+            acc = output[1].item()
             loss.backward()
 
             optimizer.step() 
             this_loss = loss.item() 
             running_loss += this_loss 
+            running_acc += acc 
 
-            pbar.set_postfix(loss=running_loss / (it + 1)) 
+            pbar.set_postfix(loss=running_loss / (it + 1), acc=running_acc / (it + 1)) 
             pbar.update() 
     loss = running_loss / len(data_loader) 
     return loss 
