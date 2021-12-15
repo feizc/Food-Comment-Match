@@ -78,6 +78,7 @@ class FoodCommentDataset(Dataset):
         url = img_txt_pair['url'] 
         txt = img_txt_pair['txt'] 
         image = Image.open(requests.get(url, stream=True).raw) 
+        print(image)
         image = self.img_extractor(image).squeeze(0)
         txt_ids = torch.Tensor(tokenize(txt, self.tokenizer)).long() 
         return image, txt_ids  

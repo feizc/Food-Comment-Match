@@ -44,7 +44,7 @@ def _classify_loss(logits: torch.Tensor) -> torch.Tensor:
 
 def contrastive_loss(similarity: torch.Tensor) -> torch.Tensor:
     caption_loss = _classify_loss(similarity)
-    image_loss = _classify_loss(similarity.T)
+    image_loss = _classify_loss(similarity.t())
     return (caption_loss + image_loss) / 2.0
 
 
@@ -718,7 +718,7 @@ class FoodCommentModel(FoodCommentPreTrainedModel):
         # cosine similarity as logits
         logit_scale = self.logit_scale.exp()
         logits_per_text = torch.matmul(text_embeds, image_embeds.t()) * logit_scale
-        logits_per_image = logits_per_text.T
+        logits_per_image = logits_per_text.t()
 
         loss = None
         if return_loss: 
@@ -733,9 +733,8 @@ class FoodCommentModel(FoodCommentPreTrainedModel):
 
 def accuracy_compute(logits): 
     index = torch.argmax(logits, dim=1) 
-    res = torch.eq(index, torch.arange(len(logits))).int()
+    res = torch.eq(index.cpu(), torch.arange(len(logits)).cpu()).int()
     return res.sum() / len(logits)
-
 
 
 
@@ -925,6 +924,9 @@ class FoodFeatureExtractor:
             return (image - mean[:, None, None]) / std[:, None, None] 
         elif image.ndim == 3 and image.shape[0] > 3: 
             return (image[:3, :, :] - mean[:, None, None]) / std[:, None, None]
+        elif image.ndim == 2: 
+            image = np.expand_dims(image, 0).repeat(3, axis=0)
+            (image.repeat(3,1,1) - mean[:, None, None]) / std[:, None, None]
         else:
             return (image - mean) / std 
         
