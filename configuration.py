@@ -46,7 +46,7 @@ class CommentConfig(PretrainedConfig):
         intermediate_size=2048,
         num_hidden_layers=12,
         num_attention_heads=8,
-        max_position_embeddings=77,
+        max_position_embeddings=512,
         hidden_act="quick_gelu",
         layer_norm_eps=0.00001,
         dropout=0.0,
