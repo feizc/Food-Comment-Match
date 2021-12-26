@@ -3,6 +3,7 @@ Transformer-based Food-Comment Matching model, referring to [CLIP](https://githu
 
 This repository provides a food image - chinese comment matching model. 
 
-issue: 
-training process takes too much time -> parallize training 
+To do list: 
 
+1) Build a high-quality food image-comment dataset; 
+2) Accelerating training process -> parallize training; 
