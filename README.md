@@ -1,5 +1,5 @@
 # Food-Comment-Match
-CLIP-like Food-Comment Matching model, referring to [CLIP](https://github.com/openai/CLIP). 
+CLIP-like Food-Comment Matching model, referring to original code of [CLIP](https://github.com/openai/CLIP). 
 
 This repository provides a food image - chinese comment matching model. 
 
